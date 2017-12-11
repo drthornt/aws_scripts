@@ -3,6 +3,10 @@
 # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-hostname.html
 # https://www.freedesktop.org/software/systemd/man/hostnamectl.html
 
+# on redhal7 systems add this to rc.local
+# /etc/rc.d/rc.local                
+# does this also work on ubuntu?
+
 if [ -x /etc/sethostname ]; then
   echo found /etc/sethostname exiting
   exit
