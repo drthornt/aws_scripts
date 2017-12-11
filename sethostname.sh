@@ -1,22 +1,17 @@
 #!/bin/sh
+# https://aws.amazon.com/premiumsupport/knowledge-center/linux-static-hostname/
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-hostname.html
+# https://www.freedesktop.org/software/systemd/man/hostnamectl.html
 
-# use this script to set a host's hostname in AWS.
+if [ -x /etc/sethostname ]; then
+  echo found /etc/sethostname exiting
+  exit
+fi
 
-# software deps:
-# sed
-# aws cli
-# curl
-# hostname
-# hostnamectl ( optional )
-
-# files touched
-# /etc/hosts
-# /etc/sysconfig/network
-# /etc/hostname
-
-# network dependancies
-# must be able to reach aws api to "describe-tags"
-# must have access to local meta data service
+echo setting hostname in sethostname.sh
+SLEEP=10
+echo sleep $SLEEP
+sleep $SLEEP
 
 # if you are using a proxy then ensure that  you have set NO_PROXY=169.254.169.254 ( link local meta data service ip )
 export NO_PROXY=169.254.169.254
@@ -25,24 +20,36 @@ export NO_PROXY=169.254.169.254
 export DOMAIN=`dnsdomainname`
 echo domain is ${DOMAIN}
 
-export EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
-export EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
+echo raw curl
+/bin/curl -v http://169.254.169.254/latest/meta-data/placement/availability-zone
+echo
 
-# SERVER=`/usr/bin/aws ec2 describe-tags --region ${EC2_REGION} --filters "Name=resource-id,Values=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)" "Name=key,Values=Name" --query 'Tags[*].Value' --output text`
-SERVER=`/usr/bin/aws ec2 describe-tags --region ${EC2_REGION} --filters "Name=resource-id,Values=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)" "Name=key,Values=Name" --query 'Tags[*].Value' --output text`
+export EC2_AVAIL_ZONE=`/bin/curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
+echo EC2_AVAIL_ZONE ${EC2_AVAIL_ZONE}
+
+if [ ${#EC2_AVAIL_ZONE} -lt 1 ]; then
+        echo "unable to get EC2_AVAIL_ZONE exiting"
+        exit
+fi
+
+export EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed -e 's:\([0-9][0-9]*\)[a-z]*\$:\\1:'`"
+echo EC2_REGION ${EC2_REGION}
+
+SERVER=`/usr/bin/aws ec2 describe-tags --region ${EC2_REGION} --filters "Name=resource-id,Values=$(wget -q -O --no-proxy - http://169.254.169.254/latest/meta-data/instance-id)" "Name=key,Values=Name" --query 'Tags[*].Value' --output text`
 PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
+if ${#SERVER} -lt 1 ]; then
+        echo unable to get server name from Tag, exiting
+        exit
+fi
+
 echo "$PRIVATE_IP $SERVER" >> /etc/hosts
 
-grep ${SERVER} /etc/hosts
-ERR=$?
-if [ ${ERR} == "0" ] ; then
-        echo the server is in /etc/hosts already , update with sed
-        echo sed
-        sed -i "s/^\($PRIVATE_IP\).*$/$PRIVATE_IP $SERVER/" /etc/hosts
-else
-        echo the server is no in /etc/hosts, add.
-        echo "$PRIVATE_IP $SERVER" >> /etc/hosts
-fi
+grep -v ${PRIVATE_IP} /etc/hosts > /tmp/tmp.host
+echo "$PRIVATE_IP $SERVER" >> /etc/hosts
+cp -f /tmp/tmp.host /etc/hosts
+
+sed -i "s/ localhost / $SERVER /" /etc/hosts
 
 hostname ${SERVER}.${DOMAIN}
 
@@ -65,4 +72,7 @@ if [ -e /etc/sysconfig/network ] ; then
                 echo "HOSTNAME=$SERVER" # >> /etc/sysconfig/network
         fi
 fi
+
+touch /etc/sethostname
+
 
