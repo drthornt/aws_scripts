@@ -14,7 +14,7 @@ rm -rf /var/cache/yum
 rm -rf /etc/sethostname
 rm -rf /etc/hostname
 
-# It can be atemping to remove /etc/machine-id but this can be problematic as 
+# It can be temping to remove /etc/machine-id but this can be problematic as 
 # the AWS provided RHEL instance doesn't have "--setup-machine-id --root=/" 
 # in it's firstboot service, which means that /etc/machine-id _never_ gets 
 # created. This is bad and among other things, journald will fail.
