@@ -9,6 +9,8 @@
 #  hostnamectl
 
 # put me in /etc/rc.local
+# when running from comnad line run as root
+# note that the instance will need an IAM Profile that allows the describetags perms ( "Action": "ec2:DescribeTags", )
 
 if [ -e /etc/profile.d/proxy.sh ]; then
         source /etc/profile.d/proxy.sh
