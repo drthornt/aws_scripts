@@ -17,7 +17,7 @@ for i in `aws ec2 --query 'RouteTables[*].Associations[*].[SubnetId]' describe-r
  do
     echo -n "     " $i " "
     name=`aws ec2 --query 'Tags[*].[Value]' describe-tags --filter "Name=resource-id,Values=${i}" "Name=key,Values=Name" --out text`
-    echo -n ${name} " "
+    echo ${name}
     aws ec2 describe-subnets --query 'Subnets[*].CidrBlock' --filter "Name=subnet-id,Values=${i}" --output text
 # aws ec2 --query 'Reservations[*].Instances[*].[State.Name, InstanceId, ImageId, PrivateIpAddress, PublicIpAddress, InstanceType]' describe-instances --output text --filter "Name=subnet-id,Values=${subnet}" "Name=instance-id,Values=${i}"
 #    aws ec2 --query 'Volumes[*].[VolumeId,VolumeType,Size,State,Attachments[0].Device]' describe-volumes --filter "Name=attachment.instance-id,Values=${i}" --out text | sort -k 6
