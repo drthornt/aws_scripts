@@ -1,5 +1,5 @@
 bombardierinc
-ignite-insurance
+aws-ignite-insurance
 nestwealth
 rdsterry
 refineddata
@@ -9,10 +9,10 @@ scalar-ms-dev
 scalar-mss
 scalar-ms-support-tools
 scalar-ms-tools
-scalar-web-dev
+#scalar-web-dev
 scalar-web-prod
 tiff
-uniprix-dev
+#uniprix-dev
 uniprix-prod
 vale-dev
 vale-prod-1
