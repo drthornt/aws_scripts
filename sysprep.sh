@@ -1,5 +1,7 @@
 #!/bin/sh
 # do this to an aws instance before you down it to become an ami.
+# references:
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
 
 /bin/shred -u /etc/ssh/*_key /etc/ssh/*_key.pub
 /bin/shred -u /home/*/.*history
