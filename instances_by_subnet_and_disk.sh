@@ -1,8 +1,8 @@
 #!/bin/sh
 
-aws ec2 --query 'Subnets[*].[SubnetId, CidrBlock]' describe-subnets --output text | sort -k 2 | while read subnet cidr
+aws ec2 --query 'Subnets[*].[SubnetId, CidrBlock ,Tags[?Key==`Name`].Value | [0] ]' describe-subnets --output text | sort -k 2 | while read subnet cidr name
 do
-echo Subnet ${subnet} ${cidr}
+echo Subnet ${subnet} ${cidr} ${name}
 for i in `aws ec2 --query 'Reservations[*].Instances[*].[InstanceId]' describe-instances --output text --filter "Name=subnet-id,Values=${subnet}"`
  do
  name=`aws ec2 --query 'Tags[*].[Value]' describe-tags --filter "Name=resource-id,Values=${i}" "Name=key,Values=Name" --out text`
