@@ -58,10 +58,11 @@ for reservation in (response["Reservations"]):
     for sg in SecurityGroups:
       # pp.pprint( sg )
       try:
-        hostlist  = sglist[sg['GroupName']]
+        
+        hostlist  = sglist[sg['GroupName']+"-"+sg['GroupId']]
         hostlist.append(name)
       except KeyError:
-        sglist[sg['GroupName']] = [name]
+        sglist[sg['GroupName']+"-"+sg['GroupId']] = [name]
 
 print "SG list is "
 
